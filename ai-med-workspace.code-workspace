@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"name": "AI-Film-Studio",
+			"path": "AI-Film-Studio"
+		},
+		{
+			"name": "ai-med-backend",
+			"path": "ai-med-backend"
+		},
+		{
+			"name": "ai-med-frontend",
+			"path": "ai-med-frontend"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/__pycache__": true,
+			"**/*.pyc": true,
+			"**/.pytest_cache": true,
+			"**/node_modules": true,
+			"**/.next": true,
+			"**/dist": true,
+			"**/build": true
+		},
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/__pycache__": true,
+			"**/.next": true,
+			"**/dist": true,
+			"**/build": true,
+			"**/coverage": true
+		},
+		"editor.formatOnSave": true,
+		"typescript.preferences.importModuleSpecifier": "relative",
+		"javascript.preferences.importModuleSpecifier": "relative"
+	}
+}
