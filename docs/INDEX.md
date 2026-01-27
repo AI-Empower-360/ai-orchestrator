@@ -62,6 +62,7 @@ This repository contains comprehensive documentation for developers, DevOps engi
 |----------|-------------|----------|
 | [NEXT_STEPS.md](../NEXT_STEPS.md) | Development roadmap | Developers |
 | [MVP_EXECUTION_PLAN.md](../MVP_EXECUTION_PLAN.md) | MVP execution plan | Project Managers |
+| [ARCHITECTURE_GAP_AND_ADVANCED.md](../ARCHITECTURE_GAP_AND_ADVANCED.md) | Gap vs. diagram, advanced roadmap | PM / Dev |
 | [CURSOR_PROMPTS.md](../CURSOR_PROMPTS.md) | Cursor AI prompts | Developers |
 
 ## 🎯 Quick Reference
