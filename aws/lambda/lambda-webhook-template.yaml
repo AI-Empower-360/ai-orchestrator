@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Lambda function for GitHub webhook to trigger CodeBuild'
+
+Parameters:
+  CodeBuildProject:
+    Type: String
+    Default: ai-im-agent-backend-build
+    Description: CodeBuild project name to trigger
+  
+  GitHubWebhookSecret:
+    Type: String
+    Default: ''
+    Description: GitHub webhook secret for HMAC verification (optional)
+    NoEcho: true
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lambda-github-webhook-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CodeBuildStartBuildPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                Resource: !Sub 'arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${CodeBuildProject}'
+
+  WebhookHandlerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: github-webhook-handler
+      Runtime: python3.11
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          CODEBUILD_PROJECT: !Ref CodeBuildProject
+          AWS_REGION: !Ref AWS::Region
+          GITHUB_WEBHOOK_SECRET: !Ref GitHubWebhookSecret
+      Code:
+        ZipFile: |
+          import json
+          import hmac
+          import hashlib
+          import os
+          import boto3
+          
+          codebuild = boto3.client('codebuild', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
+          CODEBUILD_PROJECT = os.environ.get('CODEBUILD_PROJECT', 'ai-im-agent-backend-build')
+          GITHUB_SECRET = os.environ.get('GITHUB_WEBHOOK_SECRET', '')
+          
+          def verify_signature(payload_body, signature_header):
+              if not GITHUB_SECRET:
+                  return True
+              if not signature_header or not signature_header.startswith('sha256='):
+                  return False
+              signature_hash = signature_header[7:]
+              expected_hash = hmac.new(
+                  GITHUB_SECRET.encode('utf-8'),
+                  payload_body.encode('utf-8'),
+                  hashlib.sha256
+              ).hexdigest()
+              return hmac.compare_digest(signature_hash, expected_hash)
+          
+          def lambda_handler(event, context):
+              try:
+                  body = event.get('body', '{}')
+                  if isinstance(body, str):
+                      payload = json.loads(body)
+                  else:
+                      payload = body
+                  
+                  headers = {k.lower(): v for k, v in event.get('headers', {}).items()}
+                  signature = headers.get('x-hub-signature-256', '')
+                  
+                  if not verify_signature(json.dumps(payload), signature):
+                      return {'statusCode': 401, 'body': json.dumps({'error': 'Invalid signature'})}
+                  
+                  event_type = headers.get('x-github-event', '')
+                  if event_type != 'push':
+                      return {'statusCode': 200, 'body': json.dumps({'message': f'Event {event_type} ignored'})}
+                  
+                  ref = payload.get('ref', '')
+                  branch = ref.replace('refs/heads/', '')
+                  if branch != 'main':
+                      return {'statusCode': 200, 'body': json.dumps({'message': f'Branch {branch} ignored'})}
+                  
+                  commit = payload.get('head_commit', {})
+                  commit_id = commit.get('id', '')[:7]
+                  
+                  response = codebuild.start_build(
+                      projectName=CODEBUILD_PROJECT,
+                      sourceVersion=f'refs/heads/{branch}'
+                  )
+                  
+                  return {
+                      'statusCode': 200,
+                      'body': json.dumps({
+                          'message': 'Build triggered',
+                          'buildId': response['build']['id'],
+                          'commit': commit_id
+                      })
+                  }
+              except Exception as e:
+                  return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+
+  FunctionURL:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt WebhookHandlerFunction.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - POST
+        AllowHeaders:
+          - '*'
+
+Outputs:
+  FunctionURL:
+    Description: Lambda Function URL for GitHub webhook
+    Value: !GetAtt FunctionURL.FunctionUrl
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionURL'
+  
+  FunctionName:
+    Description: Lambda function name
+    Value: !Ref WebhookHandlerFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-FunctionName'
