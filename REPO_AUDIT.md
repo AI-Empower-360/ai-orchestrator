@@ -14,6 +14,7 @@
 | **ai-med-frontend-patient** | `Projects/ai-med-frontend-patient` | AI-Empower-360/ai-med-frontend-patient | Clean. |
 | **frontend-patient** | `Projects/AI IM Agent/frontend-patient` | Same as above | **Duplicate working copy.** Modified + untracked. |
 | **ai-med-infrastructure** | `Projects/ai-med-infrastructure` | AI-Empower-360/ai-med-infrastructure | Had uncommitted docs; fixed. |
+| **ai-med-agents** | `Projects/ai-med-agents` | AI-Empower-360/ai-med-agents | **Created locally.** Placeholder repo; create on GitHub and push. |
 | **AI-Film-Studio** | `Projects/AI-Film-Studio` | AI-Empower-HQ-360/AI-Film-Studio | `develop` branch. Had 1 unpushed commit; pushed. |
 | **AI-Film-Studio-clean** | `Projects/` | Same | Redundant clone (main). |
 | **AI-Film-Studio-clean2** | `Projects/` | Same | Redundant clone (main). |
@@ -29,6 +30,10 @@
 - **`ai-orchestrator-check`:** Removed (stray stub folder, single file).
 - **AI-Film-Studio:** Added `fix_*.py` to `.gitignore`. Commit on `develop` (incl. prior fix) not pushed: **permission denied** (AI-Empower-HQ-360 vs AI-Empower-360). Push when using correct credentials.
 - **ai-med-infrastructure:** Committed and pushed new docs (DEPLOYMENT, SETUP_GUIDE, TROUBLESHOOTING, docs index). Ignored nested `ai-med-infrastructure*` folders.
+
+## Actions (latest)
+
+- **ai-med-agents:** New repo created at `Projects/ai-med-agents` (README, LICENSE, .gitignore, package.json, tsconfig, `src/index.ts`). Remote `origin` → `https://github.com/AI-Empower-360/ai-med-agents.git`. Create repo on GitHub, then `git push -u origin main`. See **NEEDED_REPOS.md**.
 
 ## Recommendations
 
