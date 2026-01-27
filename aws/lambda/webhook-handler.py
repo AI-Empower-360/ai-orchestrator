@@ -11,6 +11,7 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+# AWS_REGION is automatically available in Lambda runtime
 codebuild = boto3.client('codebuild', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
 
 # CodeBuild project name

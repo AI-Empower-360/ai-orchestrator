@@ -8,12 +8,13 @@ terraform {
     }
   }
 
-  backend "s3" {
-    # Configure backend in terraform.tfvars or via environment variables
-    # bucket = "your-terraform-state-bucket"
-    # key    = "ai-im-agent-backend/terraform.tfstate"
-    # region = "us-east-1"
-  }
+  # Using local backend for now
+  # Uncomment and configure S3 backend for production use:
+  # backend "s3" {
+  #   bucket = "your-terraform-state-bucket"
+  #   key    = "ai-im-agent-backend/terraform.tfstate"
+  #   region = "us-east-1"
+  # }
 }
 
 provider "aws" {

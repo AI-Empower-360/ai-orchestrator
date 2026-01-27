@@ -13,7 +13,6 @@ import { AuthService } from '../auth/auth.service';
 import { NotesService } from '../notes/notes.service';
 import { AlertsService } from '../alerts/alerts.service';
 import { TranscriptionService } from './transcription.service';
-import { debugLog } from '../common/debug-logger';
 
 interface AuthenticatedSocket extends Socket {
   doctorId?: string;
@@ -49,112 +48,30 @@ export class TranscriptionGateway
   ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
-    // #region agent log
-    debugLog(
-      'transcription.gateway.ts:50',
-      'WebSocket connection attempt',
-      {
-        socketId: client.id,
-        hasQuery: !!client.handshake.query,
-        hasAuth: !!client.handshake.auth,
-      },
-      'G',
-    );
-    // #endregion
     try {
-      // Extract token from query or auth (Socket.io can use both)
       const token =
         (client.handshake.query.token as string) ||
         (client.handshake.auth?.token as string) ||
         (client.handshake.auth as any)?.token;
-      // #region agent log
-      debugLog(
-        'transcription.gateway.ts:56',
-        'Token extracted',
-        {
-          hasToken: !!token,
-          tokenLength: token?.length,
-          fromQuery: !!client.handshake.query.token,
-          fromAuth: !!client.handshake.auth?.token,
-        },
-        'G',
-      );
-      // #endregion
       if (!token) {
-        // #region agent log
-        debugLog(
-          'transcription.gateway.ts:60',
-          'No token provided',
-          {
-            socketId: client.id,
-            queryKeys: Object.keys(client.handshake.query),
-            authKeys: Object.keys(client.handshake.auth || {}),
-          },
-          'G',
-        );
-        // #endregion
         client.disconnect();
         return;
       }
 
-      // Verify JWT
-      // #region agent log
-      debugLog(
-        'transcription.gateway.ts:64',
-        'Verifying JWT',
-        { hasToken: !!token },
-        'G',
-      );
-      // #endregion
       const payload = this.jwtService.verify(token);
       const doctor = await this.authService.validateToken(payload);
-      // #region agent log
-      debugLog(
-        'transcription.gateway.ts:67',
-        'Token validation result',
-        { hasDoctor: !!doctor, doctorId: doctor?.id },
-        'G',
-      );
-      // #endregion
       if (!doctor) {
-        // #region agent log
-        debugLog(
-          'transcription.gateway.ts:70',
-          'Doctor validation failed',
-          { socketId: client.id },
-          'G',
-        );
-        // #endregion
         client.disconnect();
         return;
       }
 
       client.doctorId = doctor.id;
-
-      // Send connection status
       client.emit('connection_status', {
         type: 'connection_status',
         status: 'connected',
       });
-
-      // #region agent log
-      debugLog(
-        'transcription.gateway.ts:82',
-        'WebSocket connected successfully',
-        { socketId: client.id, doctorId: doctor.id, doctorEmail: doctor.email },
-        'G',
-      );
-      // #endregion
       console.log(`Client connected: ${client.id} (Doctor: ${doctor.email})`);
     } catch (error: any) {
-      // #region agent log
-      debugLog(
-        'transcription.gateway.ts:87',
-        'WebSocket connection error',
-        { error: error.message, stack: error.stack },
-        'G',
-      );
-      // #endregion
       console.error('WebSocket connection error:', error);
       client.emit('error', {
         type: 'error',
