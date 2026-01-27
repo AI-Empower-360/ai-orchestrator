@@ -10,10 +10,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-Write-Host "🚀 Deploying to $Environment environment..." -ForegroundColor Cyan
+Write-Host "Deploying to $Environment environment..." -ForegroundColor Cyan
 
 # Pre-deployment checks
-Write-Host "`n📋 Running pre-deployment checks..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Running pre-deployment checks..." -ForegroundColor Yellow
 try {
     npm run validate
     if ($LASTEXITCODE -ne 0) { throw "Pre-build validation failed" }
@@ -21,31 +22,34 @@ try {
     npm run test:environments
     if ($LASTEXITCODE -ne 0) { throw "Environment tests failed" }
 } catch {
-    Write-Host "❌ Pre-deployment checks failed: $_" -ForegroundColor Red
+    Write-Host "Pre-deployment checks failed: $_" -ForegroundColor Red
     exit 1
 }
 
 # Build
-Write-Host "`n🔨 Building application..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Building application..." -ForegroundColor Yellow
 try {
     npm run build
     if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 } catch {
-    Write-Host "❌ Build failed: $_" -ForegroundColor Red
+    Write-Host "Build failed: $_" -ForegroundColor Red
     exit 1
 }
 
 # Run tests
-Write-Host "`n🧪 Running tests..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Running tests..." -ForegroundColor Yellow
 try {
     npm test -- --coverage --passWithNoTests
     # Continue even if some tests fail (coverage might still be good)
 } catch {
-    Write-Host "⚠️  Some tests failed, but continuing..." -ForegroundColor Yellow
+    Write-Host "Some tests failed, but continuing..." -ForegroundColor Yellow
 }
 
 # Deployment steps based on environment
-Write-Host "`n📦 Deploying to $Environment..." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Deploying to $Environment..." -ForegroundColor Yellow
 
 switch ($Environment) {
     { $_ -in 'dev', 'development' } {
@@ -67,4 +71,5 @@ switch ($Environment) {
     }
 }
 
-Write-Host "`n✅ Deployment to $Environment completed successfully!" -ForegroundColor Green
+Write-Host ""
+Write-Host "Deployment to $Environment completed successfully!" -ForegroundColor Green
