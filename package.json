@@ -20,9 +20,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "test:environments": "ts-node test-environments.ts",
+    "test:environments": "npx ts-node test-environments.ts",
     "validate": "node prebuild-validation.js",
-    "validate:env": "ts-node test-environments.ts"
+    "validate:env": "npx ts-node test-environments.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
