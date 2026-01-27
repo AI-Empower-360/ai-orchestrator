@@ -1,0 +1,12 @@
+[
+  [
+    {
+      "type": "EVENT",
+      "pattern": "PUSH"
+    },
+    {
+      "type": "HEAD_REF",
+      "pattern": "^refs/heads/main$"
+    }
+  ]
+]
