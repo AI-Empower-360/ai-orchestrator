@@ -11,17 +11,32 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     // #region agent log
-    debugLog('auth.controller.ts:12', 'Login request received', { email: loginDto.email, hasPassword: !!loginDto.password }, 'D');
+    debugLog(
+      'auth.controller.ts:12',
+      'Login request received',
+      { email: loginDto.email, hasPassword: !!loginDto.password },
+      'D',
+    );
     // #endregion
     try {
       const result = await this.authService.login(loginDto);
       // #region agent log
-      debugLog('auth.controller.ts:17', 'Login success', { hasToken: !!result.token, doctorId: result.doctor.id }, 'D');
+      debugLog(
+        'auth.controller.ts:17',
+        'Login success',
+        { hasToken: !!result.token, doctorId: result.doctor.id },
+        'D',
+      );
       // #endregion
       return result;
     } catch (error: any) {
       // #region agent log
-      debugLog('auth.controller.ts:22', 'Login error', { error: error.message, status: error.status }, 'D');
+      debugLog(
+        'auth.controller.ts:22',
+        'Login error',
+        { error: error.message, status: error.status },
+        'D',
+      );
       // #endregion
       throw error;
     }

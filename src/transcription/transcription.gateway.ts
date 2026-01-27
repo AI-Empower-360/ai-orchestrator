@@ -50,19 +50,48 @@ export class TranscriptionGateway
 
   async handleConnection(client: AuthenticatedSocket) {
     // #region agent log
-    debugLog('transcription.gateway.ts:50', 'WebSocket connection attempt', { socketId: client.id, hasQuery: !!client.handshake.query, hasAuth: !!client.handshake.auth }, 'G');
+    debugLog(
+      'transcription.gateway.ts:50',
+      'WebSocket connection attempt',
+      {
+        socketId: client.id,
+        hasQuery: !!client.handshake.query,
+        hasAuth: !!client.handshake.auth,
+      },
+      'G',
+    );
     // #endregion
     try {
       // Extract token from query or auth (Socket.io can use both)
-      const token = (client.handshake.query.token as string) || 
-                    (client.handshake.auth?.token as string) ||
-                    (client.handshake.auth as any)?.token;
+      const token =
+        (client.handshake.query.token as string) ||
+        (client.handshake.auth?.token as string) ||
+        (client.handshake.auth as any)?.token;
       // #region agent log
-      debugLog('transcription.gateway.ts:56', 'Token extracted', { hasToken: !!token, tokenLength: token?.length, fromQuery: !!client.handshake.query.token, fromAuth: !!client.handshake.auth?.token }, 'G');
+      debugLog(
+        'transcription.gateway.ts:56',
+        'Token extracted',
+        {
+          hasToken: !!token,
+          tokenLength: token?.length,
+          fromQuery: !!client.handshake.query.token,
+          fromAuth: !!client.handshake.auth?.token,
+        },
+        'G',
+      );
       // #endregion
       if (!token) {
         // #region agent log
-        debugLog('transcription.gateway.ts:60', 'No token provided', { socketId: client.id, queryKeys: Object.keys(client.handshake.query), authKeys: Object.keys(client.handshake.auth || {}) }, 'G');
+        debugLog(
+          'transcription.gateway.ts:60',
+          'No token provided',
+          {
+            socketId: client.id,
+            queryKeys: Object.keys(client.handshake.query),
+            authKeys: Object.keys(client.handshake.auth || {}),
+          },
+          'G',
+        );
         // #endregion
         client.disconnect();
         return;
@@ -70,16 +99,31 @@ export class TranscriptionGateway
 
       // Verify JWT
       // #region agent log
-      debugLog('transcription.gateway.ts:64', 'Verifying JWT', { hasToken: !!token }, 'G');
+      debugLog(
+        'transcription.gateway.ts:64',
+        'Verifying JWT',
+        { hasToken: !!token },
+        'G',
+      );
       // #endregion
       const payload = this.jwtService.verify(token);
       const doctor = await this.authService.validateToken(payload);
       // #region agent log
-      debugLog('transcription.gateway.ts:67', 'Token validation result', { hasDoctor: !!doctor, doctorId: doctor?.id }, 'G');
+      debugLog(
+        'transcription.gateway.ts:67',
+        'Token validation result',
+        { hasDoctor: !!doctor, doctorId: doctor?.id },
+        'G',
+      );
       // #endregion
       if (!doctor) {
         // #region agent log
-        debugLog('transcription.gateway.ts:70', 'Doctor validation failed', { socketId: client.id }, 'G');
+        debugLog(
+          'transcription.gateway.ts:70',
+          'Doctor validation failed',
+          { socketId: client.id },
+          'G',
+        );
         // #endregion
         client.disconnect();
         return;
@@ -94,12 +138,22 @@ export class TranscriptionGateway
       });
 
       // #region agent log
-      debugLog('transcription.gateway.ts:82', 'WebSocket connected successfully', { socketId: client.id, doctorId: doctor.id, doctorEmail: doctor.email }, 'G');
+      debugLog(
+        'transcription.gateway.ts:82',
+        'WebSocket connected successfully',
+        { socketId: client.id, doctorId: doctor.id, doctorEmail: doctor.email },
+        'G',
+      );
       // #endregion
       console.log(`Client connected: ${client.id} (Doctor: ${doctor.email})`);
     } catch (error: any) {
       // #region agent log
-      debugLog('transcription.gateway.ts:87', 'WebSocket connection error', { error: error.message, stack: error.stack }, 'G');
+      debugLog(
+        'transcription.gateway.ts:87',
+        'WebSocket connection error',
+        { error: error.message, stack: error.stack },
+        'G',
+      );
       // #endregion
       console.error('WebSocket connection error:', error);
       client.emit('error', {
@@ -145,32 +199,38 @@ export class TranscriptionGateway
     this.activeSessions.get(sessionId)!.add(client.id);
 
     // Start transcription service for this session
-    this.transcriptionService.startSession(sessionId, (events) => {
-      // Broadcast to all clients in this session
-      const sessionClients = this.activeSessions.get(sessionId);
-      if (sessionClients) {
-        sessionClients.forEach((socketId) => {
-          const socket = this.server.sockets.sockets.get(socketId);
-          if (socket) {
-            socket.emit(events.type, events);
-          }
+    this.transcriptionService
+      .startSession(sessionId, (events) => {
+        // Broadcast to all clients in this session
+        const sessionClients = this.activeSessions.get(sessionId);
+        if (sessionClients) {
+          sessionClients.forEach((socketId) => {
+            const socket = this.server.sockets.sockets.get(socketId);
+            if (socket) {
+              socket.emit(events.type, events);
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(
+          `Failed to start transcription session ${sessionId}:`,
+          error,
+        );
+        client.emit('error', {
+          type: 'error',
+          message: 'Failed to start transcription',
+          code: 'TRANSCRIPTION_ERROR',
         });
-      }
-    }).catch((error) => {
-      console.error(`Failed to start transcription session ${sessionId}:`, error);
-      client.emit('error', {
-        type: 'error',
-        message: 'Failed to start transcription',
-        code: 'TRANSCRIPTION_ERROR',
       });
-    });
 
     console.log(`Recording started for session: ${sessionId}`);
   }
 
   @SubscribeMessage('audio_chunk')
   async handleAudioChunk(
-    @MessageBody() data: { type: string; sessionId: string; chunk: string; timestamp: number },
+    @MessageBody()
+    data: { type: string; sessionId: string; chunk: string; timestamp: number },
     @ConnectedSocket() client: AuthenticatedSocket,
   ) {
     if (!client.sessionId) {
@@ -181,12 +241,14 @@ export class TranscriptionGateway
     const audioBuffer = Buffer.from(data.chunk, 'base64');
 
     // Process audio chunk with real transcription provider
-    this.transcriptionService.processAudioChunk(
-      client.sessionId,
-      audioBuffer,
-    ).catch((error) => {
-      console.error(`Error processing audio chunk for session ${client.sessionId}:`, error);
-    });
+    this.transcriptionService
+      .processAudioChunk(client.sessionId, audioBuffer)
+      .catch((error) => {
+        console.error(
+          `Error processing audio chunk for session ${client.sessionId}:`,
+          error,
+        );
+      });
   }
 
   @SubscribeMessage('stop_recording')
@@ -198,7 +260,10 @@ export class TranscriptionGateway
 
     // Stop transcription service
     this.transcriptionService.stopSession(sessionId).catch((error) => {
-      console.error(`Error stopping transcription session ${sessionId}:`, error);
+      console.error(
+        `Error stopping transcription session ${sessionId}:`,
+        error,
+      );
     });
 
     // Remove from active sessions

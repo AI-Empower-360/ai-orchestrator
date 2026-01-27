@@ -21,9 +21,17 @@ const MOCK_DOCTORS: Doctor[] = [
 export class AuthService {
   constructor(private jwtService: JwtService) {}
 
-  async validateDoctor(email: string, password: string): Promise<Doctor | null> {
+  async validateDoctor(
+    email: string,
+    password: string,
+  ): Promise<Doctor | null> {
     // #region agent log
-    debugLog('auth.service.ts:25', 'Validating doctor', { email, hasPassword: !!password }, 'E');
+    debugLog(
+      'auth.service.ts:25',
+      'Validating doctor',
+      { email, hasPassword: !!password },
+      'E',
+    );
     // #endregion
     const doctor = MOCK_DOCTORS.find((d) => d.email === email);
     if (!doctor) {
@@ -39,25 +47,41 @@ export class AuthService {
       (await bcrypt.compare(password, doctor.password));
 
     // #region agent log
-    debugLog('auth.service.ts:37', 'Password validation result', { isPasswordValid, doctorId: doctor.id }, 'E');
+    debugLog(
+      'auth.service.ts:37',
+      'Password validation result',
+      { isPasswordValid, doctorId: doctor.id },
+      'E',
+    );
     // #endregion
 
     if (!isPasswordValid) {
       return null;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- exclude password from result
     const { password: _, ...result } = doctor;
     return result as Doctor;
   }
 
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     // #region agent log
-    debugLog('auth.service.ts:50', 'Login attempt', { email: loginDto.email }, 'F');
+    debugLog(
+      'auth.service.ts:50',
+      'Login attempt',
+      { email: loginDto.email },
+      'F',
+    );
     // #endregion
     const doctor = await this.validateDoctor(loginDto.email, loginDto.password);
     if (!doctor) {
       // #region agent log
-      debugLog('auth.service.ts:54', 'Login failed - invalid credentials', { email: loginDto.email }, 'F');
+      debugLog(
+        'auth.service.ts:54',
+        'Login failed - invalid credentials',
+        { email: loginDto.email },
+        'F',
+      );
       // #endregion
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -65,7 +89,12 @@ export class AuthService {
     const payload = { email: doctor.email, sub: doctor.id };
     const token = this.jwtService.sign(payload);
     // #region agent log
-    debugLog('auth.service.ts:61', 'JWT token generated', { hasToken: !!token, tokenLength: token.length, doctorId: doctor.id }, 'F');
+    debugLog(
+      'auth.service.ts:61',
+      'JWT token generated',
+      { hasToken: !!token, tokenLength: token.length, doctorId: doctor.id },
+      'F',
+    );
     // #endregion
 
     return {
@@ -83,6 +112,7 @@ export class AuthService {
     if (!doctor) {
       return null;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- exclude password from result
     const { password: _, ...result } = doctor;
     return result as Doctor;
   }

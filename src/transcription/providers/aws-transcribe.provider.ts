@@ -22,7 +22,9 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
   async initialize(): Promise<void> {
     const region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const secretAccessKey = this.configService.get<string>(
+      'AWS_SECRET_ACCESS_KEY',
+    );
 
     if (region && accessKeyId && secretAccessKey) {
       this.client = new TranscribeStreamingClient({
@@ -34,7 +36,9 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
       });
       this.logger.log('AWS Transcribe Medical provider initialized');
     } else {
-      this.logger.warn('AWS credentials not set. AWS Transcribe provider unavailable.');
+      this.logger.warn(
+        'AWS credentials not set. AWS Transcribe provider unavailable.',
+      );
     }
   }
 
@@ -43,8 +47,10 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
   }
 
   async transcribe(
-    audioBuffer: Buffer,
-    options?: TranscriptionOptions,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- interface requires; we throw
+    _audioBuffer: Buffer,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- interface requires; we throw
+    _options?: TranscriptionOptions,
   ): Promise<TranscriptionResult> {
     // AWS Transcribe Streaming is designed for streaming, not one-off transcription
     // For file-based transcription, use AWS Transcribe (not streaming) API
@@ -85,60 +91,75 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
         LanguageCode: languageCode,
         MediaSampleRateHertz: mediaSampleRateHertz,
         MediaEncoding: mediaEncoding,
-        Specialty: 'PRIMARYCARE', // Medical specialty
-        Type: 'CONVERSATION', // Conversation type
-        EnableChannelIdentification: true, // Identify speaker channels
-        ShowSpeakerLabels: true, // Show speaker labels
-        MediaStream: audioStream,
+        AudioStream: audioStream,
       });
 
       // Start the streaming transcription (async)
-      this.client.send(command).then((response) => {
-        // Handle transcription events
-        if (response.TranscriptResultStream) {
-          (async () => {
-            try {
-              for await (const event of response.TranscriptResultStream!) {
-                if (!session.isActive) break;
+      this.client
+        .send(command)
+        .then((response) => {
+          // Handle transcription events
+          if (response.TranscriptResultStream) {
+            (async () => {
+              try {
+                for await (const event of response.TranscriptResultStream!) {
+                  if (!session.isActive) break;
 
-                if (event.TranscriptEvent?.Transcript?.Results) {
-                  for (const result of event.TranscriptEvent.Transcript.Results) {
-                    if (result.Alternatives && result.Alternatives.length > 0) {
-                      const alternative = result.Alternatives[0];
-                      const transcriptionResult: TranscriptionResult = {
-                        text: alternative.Transcript || '',
-                        confidence: alternative.Confidence,
-                        language: languageCode,
-                        isPartial: !result.IsPartial,
-                        speaker: alternative.Items?.[0]?.SpeakerLabel,
-                        timestamp: Date.now(),
-                      };
+                  if (event.TranscriptEvent?.Transcript?.Results) {
+                    for (const result of event.TranscriptEvent.Transcript
+                      .Results) {
+                      if (
+                        result.Alternatives &&
+                        result.Alternatives.length > 0
+                      ) {
+                        const alternative = result.Alternatives[0] as {
+                          Transcript?: string;
+                          Confidence?: number;
+                          Items?: Array<{ SpeakerLabel?: string }>;
+                        };
+                        const transcriptionResult: TranscriptionResult = {
+                          text: alternative.Transcript || '',
+                          confidence: alternative.Confidence,
+                          language: languageCode,
+                          isPartial: !result.IsPartial,
+                          speaker: alternative.Items?.[0]?.SpeakerLabel,
+                          timestamp: Date.now(),
+                        };
 
-                      onResult(transcriptionResult);
+                        onResult(transcriptionResult);
+                      }
                     }
                   }
                 }
-              }
-            } catch (error: any) {
-              if (session.isActive) {
-                this.logger.error(`Error processing transcription stream: ${error.message}`);
-                if (onError) {
-                  onError(error);
+              } catch (error: any) {
+                if (session.isActive) {
+                  this.logger.error(
+                    `Error processing transcription stream: ${error.message}`,
+                  );
+                  if (onError) {
+                    onError(error);
+                  }
                 }
               }
-            }
-          })();
-        }
-      }).catch((error: any) => {
-        this.logger.error(`AWS Transcribe streaming failed: ${error.message}`, error.stack);
-        if (onError) {
-          onError(error);
-        }
-      });
+            })();
+          }
+        })
+        .catch((error: any) => {
+          this.logger.error(
+            `AWS Transcribe streaming failed: ${error.message}`,
+            error.stack,
+          );
+          if (onError) {
+            onError(error);
+          }
+        });
 
       this.logger.log(`AWS Transcribe streaming session started: ${sessionId}`);
     } catch (error: any) {
-      this.logger.error(`AWS Transcribe streaming failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `AWS Transcribe streaming failed: ${error.message}`,
+        error.stack,
+      );
       if (onError) {
         onError(error);
       }
@@ -150,8 +171,8 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
    * Create audio stream for AWS Transcribe
    */
   private createAudioStream(sessionId: string): AsyncIterable<AudioStream> {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- capture this for async generator
     const self = this;
-    
     return {
       async *[Symbol.asyncIterator]() {
         const session = self.streamingSessions.get(sessionId);
@@ -169,14 +190,17 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
             }
           } else {
             // Wait a bit before checking again
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 100));
           }
         }
       },
     };
   }
 
-  async processAudioChunk(sessionId: string, audioChunk: Buffer): Promise<void> {
+  async processAudioChunk(
+    sessionId: string,
+    audioChunk: Buffer,
+  ): Promise<void> {
     const session = this.streamingSessions.get(sessionId);
     if (!session) {
       throw new Error(`No active streaming session found: ${sessionId}`);
@@ -200,7 +224,7 @@ export class AWSTranscribeProvider implements TranscriptionProvider {
     if (session) {
       // Mark session as inactive to stop audio stream
       session.isActive = false;
-      
+
       // Close the streaming connection
       // AWS Transcribe will automatically close when the stream ends
       this.streamingSessions.delete(sessionId);

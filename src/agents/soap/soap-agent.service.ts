@@ -19,7 +19,9 @@ export class SOAPAgentService {
    */
   async generateSOAPNotes(transcriptionText: string): Promise<SOAPNotes> {
     if (!this.llmService.isAvailable()) {
-      this.logger.log('Using rule-based SOAP note generation (LLM not available)');
+      this.logger.log(
+        'Using rule-based SOAP note generation (LLM not available)',
+      );
       return this.getRuleBasedSOAPNotes(transcriptionText);
     }
 
@@ -49,9 +51,8 @@ Guidelines:
         },
       ];
 
-      const response = await this.llmService.generateStructuredResponse<SOAPNotes>(
-        messages,
-        {
+      const response =
+        await this.llmService.generateStructuredResponse<SOAPNotes>(messages, {
           type: 'object',
           properties: {
             subjective: { type: 'string' },
@@ -60,19 +61,28 @@ Guidelines:
             plan: { type: 'string' },
           },
           required: ['subjective', 'objective', 'assessment', 'plan'],
-        },
-      );
+        });
 
       // Validate response
-      if (!response.subjective || !response.objective || !response.assessment || !response.plan) {
-        this.logger.warn('Incomplete SOAP notes from LLM, using rule-based fallback');
+      if (
+        !response.subjective ||
+        !response.objective ||
+        !response.assessment ||
+        !response.plan
+      ) {
+        this.logger.warn(
+          'Incomplete SOAP notes from LLM, using rule-based fallback',
+        );
         return this.getRuleBasedSOAPNotes(transcriptionText);
       }
 
       this.logger.log('SOAP notes generated successfully via AI');
       return response;
     } catch (error: any) {
-      this.logger.error(`Failed to generate SOAP notes via AI: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to generate SOAP notes via AI: ${error.message}`,
+        error.stack,
+      );
       this.logger.log('Falling back to rule-based generation');
       // Fallback to rule-based on error
       return this.getRuleBasedSOAPNotes(transcriptionText);
@@ -112,9 +122,8 @@ Return updated SOAP notes as JSON with keys: subjective, objective, assessment, 
         },
       ];
 
-      const response = await this.llmService.generateStructuredResponse<SOAPNotes>(
-        messages,
-        {
+      const response =
+        await this.llmService.generateStructuredResponse<SOAPNotes>(messages, {
           type: 'object',
           properties: {
             subjective: { type: 'string' },
@@ -123,13 +132,15 @@ Return updated SOAP notes as JSON with keys: subjective, objective, assessment, 
             plan: { type: 'string' },
           },
           required: ['subjective', 'objective', 'assessment', 'plan'],
-        },
-      );
+        });
 
       this.logger.log('SOAP notes updated successfully via AI');
       return response;
     } catch (error: any) {
-      this.logger.error(`Failed to update SOAP notes via AI: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update SOAP notes via AI: ${error.message}`,
+        error.stack,
+      );
       this.logger.log('Falling back to rule-based merge');
       return this.mergeSOAPNotes(existingSOAP, newTranscription);
     }
@@ -140,51 +151,101 @@ Return updated SOAP notes as JSON with keys: subjective, objective, assessment, 
    */
   private getRuleBasedSOAPNotes(transcriptionText: string): SOAPNotes {
     const lowerText = transcriptionText.toLowerCase();
-    const lines = transcriptionText.split(/[.!?]\s+/).filter(line => line.trim().length > 0);
+    const lines = transcriptionText
+      .split(/[.!?]\s+/)
+      .filter((line) => line.trim().length > 0);
 
     // Extract Subjective (patient-reported symptoms, history)
-    const subjectiveKeywords = ['patient', 'reports', 'complains', 'states', 'feels', 'symptoms', 'history'];
-    const subjectiveLines = lines.filter(line => 
-      subjectiveKeywords.some(keyword => line.toLowerCase().includes(keyword))
+    const subjectiveKeywords = [
+      'patient',
+      'reports',
+      'complains',
+      'states',
+      'feels',
+      'symptoms',
+      'history',
+    ];
+    const subjectiveLines = lines.filter((line) =>
+      subjectiveKeywords.some((keyword) =>
+        line.toLowerCase().includes(keyword),
+      ),
     );
-    const subjective = subjectiveLines.length > 0 
-      ? subjectiveLines.join('. ') 
-      : (transcriptionText.includes('patient') || transcriptionText.includes('reports')
+    const subjective =
+      subjectiveLines.length > 0
+        ? subjectiveLines.join('. ')
+        : transcriptionText.includes('patient') ||
+            transcriptionText.includes('reports')
           ? transcriptionText
-          : 'Patient information recorded from conversation');
+          : 'Patient information recorded from conversation';
 
     // Extract Objective (observable findings, vitals, exam)
-    const objectiveKeywords = ['vital', 'bp', 'blood pressure', 'heart rate', 'temperature', 'exam', 'physical', 'observed', 'measured'];
-    const objectiveLines = lines.filter(line => 
-      objectiveKeywords.some(keyword => line.toLowerCase().includes(keyword))
+    const objectiveKeywords = [
+      'vital',
+      'bp',
+      'blood pressure',
+      'heart rate',
+      'temperature',
+      'exam',
+      'physical',
+      'observed',
+      'measured',
+    ];
+    const objectiveLines = lines.filter((line) =>
+      objectiveKeywords.some((keyword) => line.toLowerCase().includes(keyword)),
     );
-    const objective = objectiveLines.length > 0
-      ? objectiveLines.join('. ')
-      : (lowerText.includes('vital') || lowerText.includes('bp') || lowerText.includes('blood pressure')
+    const objective =
+      objectiveLines.length > 0
+        ? objectiveLines.join('. ')
+        : lowerText.includes('vital') ||
+            lowerText.includes('bp') ||
+            lowerText.includes('blood pressure')
           ? 'Vital signs and physical findings mentioned in conversation'
-          : 'Objective findings to be documented');
+          : 'Objective findings to be documented';
 
     // Extract Assessment (diagnosis, evaluation)
-    const assessmentKeywords = ['diagnosis', 'assessment', 'evaluation', 'likely', 'possible', 'rule out', 'differential'];
-    const assessmentLines = lines.filter(line => 
-      assessmentKeywords.some(keyword => line.toLowerCase().includes(keyword))
+    const assessmentKeywords = [
+      'diagnosis',
+      'assessment',
+      'evaluation',
+      'likely',
+      'possible',
+      'rule out',
+      'differential',
+    ];
+    const assessmentLines = lines.filter((line) =>
+      assessmentKeywords.some((keyword) =>
+        line.toLowerCase().includes(keyword),
+      ),
     );
-    const assessment = assessmentLines.length > 0
-      ? assessmentLines.join('. ')
-      : (lowerText.includes('diagnosis') || lowerText.includes('assessment')
+    const assessment =
+      assessmentLines.length > 0
+        ? assessmentLines.join('. ')
+        : lowerText.includes('diagnosis') || lowerText.includes('assessment')
           ? transcriptionText
-          : 'Clinical assessment based on presentation');
+          : 'Clinical assessment based on presentation';
 
     // Extract Plan (treatment, orders, follow-up)
-    const planKeywords = ['plan', 'order', 'prescribe', 'follow', 'treatment', 'medication', 'test', 'refer'];
-    const planLines = lines.filter(line => 
-      planKeywords.some(keyword => line.toLowerCase().includes(keyword))
+    const planKeywords = [
+      'plan',
+      'order',
+      'prescribe',
+      'follow',
+      'treatment',
+      'medication',
+      'test',
+      'refer',
+    ];
+    const planLines = lines.filter((line) =>
+      planKeywords.some((keyword) => line.toLowerCase().includes(keyword)),
     );
-    const plan = planLines.length > 0
-      ? planLines.join('. ')
-      : (lowerText.includes('plan') || lowerText.includes('order') || lowerText.includes('follow')
+    const plan =
+      planLines.length > 0
+        ? planLines.join('. ')
+        : lowerText.includes('plan') ||
+            lowerText.includes('order') ||
+            lowerText.includes('follow')
           ? transcriptionText
-          : 'Treatment plan to be determined');
+          : 'Treatment plan to be determined';
 
     return {
       subjective: subjective.trim() || 'Patient information recorded',

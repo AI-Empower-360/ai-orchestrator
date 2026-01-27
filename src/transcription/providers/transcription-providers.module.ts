@@ -5,8 +5,16 @@ import { TranscriptionProviderFactory } from './transcription-provider.factory';
 
 @Global()
 @Module({
-  providers: [WhisperProvider, AWSTranscribeProvider, TranscriptionProviderFactory],
-  exports: [WhisperProvider, AWSTranscribeProvider, TranscriptionProviderFactory],
+  providers: [
+    WhisperProvider,
+    AWSTranscribeProvider,
+    TranscriptionProviderFactory,
+  ],
+  exports: [
+    WhisperProvider,
+    AWSTranscribeProvider,
+    TranscriptionProviderFactory,
+  ],
 })
 export class TranscriptionProvidersModule {
   constructor(private factory: TranscriptionProviderFactory) {}

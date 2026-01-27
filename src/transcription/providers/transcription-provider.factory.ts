@@ -9,7 +9,8 @@ export type TranscriptionProviderType = 'whisper' | 'aws-transcribe' | 'mock';
 @Injectable()
 export class TranscriptionProviderFactory {
   private readonly logger = new Logger(TranscriptionProviderFactory.name);
-  private providers: Map<TranscriptionProviderType, TranscriptionProvider> = new Map();
+  private providers: Map<TranscriptionProviderType, TranscriptionProvider> =
+    new Map();
 
   constructor(
     private configService: ConfigService,
@@ -63,12 +64,16 @@ export class TranscriptionProviderFactory {
 
     // Fallback to available provider
     if (this.providers.has('whisper')) {
-      this.logger.warn(`Requested provider '${providerType}' not available. Falling back to Whisper.`);
+      this.logger.warn(
+        `Requested provider '${providerType}' not available. Falling back to Whisper.`,
+      );
       return this.providers.get('whisper')!;
     }
 
     if (this.providers.has('aws-transcribe')) {
-      this.logger.warn(`Requested provider '${providerType}' not available. Falling back to AWS Transcribe.`);
+      this.logger.warn(
+        `Requested provider '${providerType}' not available. Falling back to AWS Transcribe.`,
+      );
       return this.providers.get('aws-transcribe')!;
     }
 

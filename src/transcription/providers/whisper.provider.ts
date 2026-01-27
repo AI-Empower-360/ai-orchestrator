@@ -62,7 +62,10 @@ export class WhisperProvider implements TranscriptionProvider {
         timestamp: Date.now(),
       };
     } catch (error: any) {
-      this.logger.error(`Whisper transcription failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Whisper transcription failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Whisper transcription failed: ${error.message}`);
     }
   }
@@ -94,7 +97,7 @@ export class WhisperProvider implements TranscriptionProvider {
           // Combine chunks and transcribe
           const combinedBuffer = Buffer.concat(session.audioChunks);
           const result = await this.transcribe(combinedBuffer);
-          
+
           // Mark as partial for streaming
           result.isPartial = true;
           onResult(result);
@@ -113,7 +116,10 @@ export class WhisperProvider implements TranscriptionProvider {
     this.logger.log(`Whisper streaming session started: ${sessionId}`);
   }
 
-  async processAudioChunk(sessionId: string, audioChunk: Buffer): Promise<void> {
+  async processAudioChunk(
+    sessionId: string,
+    audioChunk: Buffer,
+  ): Promise<void> {
     const session = this.streamingSessions.get(sessionId);
     if (session) {
       session.audioChunks.push(audioChunk);

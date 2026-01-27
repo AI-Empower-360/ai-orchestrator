@@ -1,13 +1,9 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import { NotesService } from './notes.service';
-import { UpdateSOAPNotesDto, SOAPNotesResponseDto } from '../common/dto/soap-notes.dto';
+import {
+  UpdateSOAPNotesDto,
+  SOAPNotesResponseDto,
+} from '../common/dto/soap-notes.dto';
 import { SimpleJwtGuard } from '../auth/simple-jwt.guard';
 
 @Controller('api/notes')

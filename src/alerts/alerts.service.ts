@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AlertDto, AlertsResponseDto, AcknowledgeAlertResponseDto } from '../common/dto/alert.dto';
+import {
+  AlertDto,
+  AlertsResponseDto,
+  AcknowledgeAlertResponseDto,
+} from '../common/dto/alert.dto';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock alerts storage (replace with real database)
@@ -39,7 +43,9 @@ export class AlertsService {
     };
   }
 
-  async acknowledgeAlert(alertId: string): Promise<AcknowledgeAlertResponseDto> {
+  async acknowledgeAlert(
+    alertId: string,
+  ): Promise<AcknowledgeAlertResponseDto> {
     const alert = alerts.get(alertId);
     if (!alert) {
       throw new NotFoundException(`Alert with ID ${alertId} not found`);
@@ -52,7 +58,10 @@ export class AlertsService {
   }
 
   // Internal method for WebSocket alerts
-  createAlert(severity: 'info' | 'warning' | 'critical', message: string): AlertDto {
+  createAlert(
+    severity: 'info' | 'warning' | 'critical',
+    message: string,
+  ): AlertDto {
     const alert: AlertDto = {
       id: uuidv4(),
       severity,

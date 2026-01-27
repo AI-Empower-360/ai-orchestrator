@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
+import type { ChatCompletion } from 'openai/resources/chat/completions';
 
 export interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
@@ -26,13 +27,19 @@ export class LLMService {
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
-    const forceRuleBased = this.configService.get<string>('FORCE_RULE_BASED', 'false') === 'true';
+    const forceRuleBased =
+      this.configService.get<string>('FORCE_RULE_BASED', 'false') === 'true';
     this.model = this.configService.get<string>('OPENAI_MODEL', 'gpt-4o-mini');
-    this.temperature = this.configService.get<number>('OPENAI_TEMPERATURE', 0.7);
+    this.temperature = this.configService.get<number>(
+      'OPENAI_TEMPERATURE',
+      0.7,
+    );
     this.maxTokens = this.configService.get<number>('OPENAI_MAX_TOKENS', 2000);
 
     if (forceRuleBased) {
-      this.logger.log('Rule-based mode forced (FORCE_RULE_BASED=true). LLM features disabled for testing.');
+      this.logger.log(
+        'Rule-based mode forced (FORCE_RULE_BASED=true). LLM features disabled for testing.',
+      );
       this.openai = null;
     } else if (apiKey) {
       this.openai = new OpenAI({
@@ -40,7 +47,9 @@ export class LLMService {
       });
       this.logger.log('OpenAI client initialized');
     } else {
-      this.logger.warn('OPENAI_API_KEY not set. LLM features will be disabled. Using rule-based fallback.');
+      this.logger.warn(
+        'OPENAI_API_KEY not set. LLM features will be disabled. Using rule-based fallback.',
+      );
     }
   }
 
@@ -75,15 +84,16 @@ export class LLMService {
         })),
         temperature: options?.temperature ?? this.temperature,
         max_tokens: options?.maxTokens ?? this.maxTokens,
-        stream: options?.stream ?? false,
+        stream: false,
       });
 
-      const content = response.choices[0]?.message?.content || '';
-      const usage = response.usage
+      const completion = response as ChatCompletion;
+      const content = completion.choices[0]?.message?.content || '';
+      const usage = completion.usage
         ? {
-            promptTokens: response.usage.prompt_tokens,
-            completionTokens: response.usage.completion_tokens,
-            totalTokens: response.usage.total_tokens,
+            promptTokens: completion.usage.prompt_tokens,
+            completionTokens: completion.usage.completion_tokens,
+            totalTokens: completion.usage.total_tokens,
           }
         : undefined;
 
@@ -130,7 +140,10 @@ export class LLMService {
         }
       }
     } catch (error: any) {
-      this.logger.error(`OpenAI streaming error: ${error.message}`, error.stack);
+      this.logger.error(
+        `OpenAI streaming error: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Failed to stream completion: ${error.message}`);
     }
   }
@@ -159,7 +172,7 @@ export class LLMService {
       });
 
       const content = response.choices[0]?.message?.content || '';
-      
+
       if (schema) {
         try {
           return JSON.parse(content) as T;
@@ -171,8 +184,13 @@ export class LLMService {
 
       return content as unknown as T;
     } catch (error: any) {
-      this.logger.error(`OpenAI structured response error: ${error.message}`, error.stack);
-      throw new Error(`Failed to generate structured response: ${error.message}`);
+      this.logger.error(
+        `OpenAI structured response error: ${error.message}`,
+        error.stack,
+      );
+      throw new Error(
+        `Failed to generate structured response: ${error.message}`,
+      );
     }
   }
 }

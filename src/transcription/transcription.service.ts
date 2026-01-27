@@ -3,7 +3,10 @@ import { NotesService } from '../notes/notes.service';
 import { AlertsService } from '../alerts/alerts.service';
 import { AgentOrchestratorService } from '../agents/orchestrator/agent-orchestrator.service';
 import { TranscriptionProviderFactory } from './providers/transcription-provider.factory';
-import { TranscriptionProvider, TranscriptionResult } from './providers/transcription-provider.interface';
+import {
+  TranscriptionProvider,
+  TranscriptionResult,
+} from './providers/transcription-provider.interface';
 
 interface TranscriptionCallback {
   (event: any): void;
@@ -36,27 +39,35 @@ export class TranscriptionService implements OnModuleInit {
     // Check if OpenAI API key is configured and rule-based mode is not forced
     const forceRuleBased = process.env.FORCE_RULE_BASED === 'true';
     this.USE_REAL_AI = !!process.env.OPENAI_API_KEY && !forceRuleBased;
-    
+
     // Check if real transcription should be used
     const transcriptionProvider = process.env.TRANSCRIPTION_PROVIDER;
-    this.USE_REAL_TRANSCRIPTION = 
+    this.USE_REAL_TRANSCRIPTION =
       (transcriptionProvider === 'whisper' && !!process.env.OPENAI_API_KEY) ||
-      (transcriptionProvider === 'aws-transcribe' && 
-       !!process.env.AWS_ACCESS_KEY_ID && 
-       !!process.env.AWS_SECRET_ACCESS_KEY);
-    
+      (transcriptionProvider === 'aws-transcribe' &&
+        !!process.env.AWS_ACCESS_KEY_ID &&
+        !!process.env.AWS_SECRET_ACCESS_KEY);
+
     if (forceRuleBased) {
-      this.logger.log('Rule-based mode enabled (FORCE_RULE_BASED=true). Using rule-based generation for testing.');
+      this.logger.log(
+        'Rule-based mode enabled (FORCE_RULE_BASED=true). Using rule-based generation for testing.',
+      );
     } else if (this.USE_REAL_AI) {
       this.logger.log('Real AI agents enabled');
     } else {
-      this.logger.log('OpenAI API key not configured. Using rule-based generation (suitable for testing).');
+      this.logger.log(
+        'OpenAI API key not configured. Using rule-based generation (suitable for testing).',
+      );
     }
 
     if (this.USE_REAL_TRANSCRIPTION) {
-      this.logger.log(`Real transcription enabled using provider: ${transcriptionProvider || 'whisper'}`);
+      this.logger.log(
+        `Real transcription enabled using provider: ${transcriptionProvider || 'whisper'}`,
+      );
     } else {
-      this.logger.log('Using mock transcription (configure TRANSCRIPTION_PROVIDER to enable real transcription)');
+      this.logger.log(
+        'Using mock transcription (configure TRANSCRIPTION_PROVIDER to enable real transcription)',
+      );
     }
   }
 
@@ -71,11 +82,15 @@ export class TranscriptionService implements OnModuleInit {
     }
   }
 
-  async startSession(sessionId: string, callback: TranscriptionCallback): Promise<void> {
+  async startSession(
+    sessionId: string,
+    callback: TranscriptionCallback,
+  ): Promise<void> {
     // Stop existing session if any
     this.stopSession(sessionId);
 
-    const useRealTranscription = this.USE_REAL_TRANSCRIPTION && this.transcriptionProvider !== null;
+    const useRealTranscription =
+      this.USE_REAL_TRANSCRIPTION && this.transcriptionProvider !== null;
 
     const session: ActiveSession = {
       sessionId,
@@ -96,14 +111,18 @@ export class TranscriptionService implements OnModuleInit {
             this.handleTranscriptionResult(sessionId, result);
           },
           (error: Error) => {
-            this.logger.error(`Transcription error for session ${sessionId}: ${error.message}`);
+            this.logger.error(
+              `Transcription error for session ${sessionId}: ${error.message}`,
+            );
             // Fallback to mock on error
             this.simulateTranscription(sessionId);
           },
         );
         this.logger.log(`Real transcription started for session ${sessionId}`);
       } catch (error: any) {
-        this.logger.error(`Failed to start real transcription: ${error.message}`);
+        this.logger.error(
+          `Failed to start real transcription: ${error.message}`,
+        );
         this.logger.log('Falling back to mock transcription');
         this.simulateTranscription(sessionId);
       }
@@ -115,7 +134,7 @@ export class TranscriptionService implements OnModuleInit {
 
   async stopSession(sessionId: string): Promise<void> {
     const session = this.activeSessions.get(sessionId);
-    
+
     if (session) {
       // Stop mock transcription interval if running
       if (session.intervalId) {
@@ -126,7 +145,9 @@ export class TranscriptionService implements OnModuleInit {
       if (session.useRealTranscription && this.transcriptionProvider) {
         try {
           await this.transcriptionProvider.stopStreaming(sessionId);
-          this.logger.log(`Real transcription stopped for session ${sessionId}`);
+          this.logger.log(
+            `Real transcription stopped for session ${sessionId}`,
+          );
         } catch (error: any) {
           this.logger.error(`Error stopping transcription: ${error.message}`);
         }
@@ -136,7 +157,10 @@ export class TranscriptionService implements OnModuleInit {
     }
   }
 
-  async processAudioChunk(sessionId: string, audioBuffer: Buffer): Promise<void> {
+  async processAudioChunk(
+    sessionId: string,
+    audioBuffer: Buffer,
+  ): Promise<void> {
     const session = this.activeSessions.get(sessionId);
     if (!session) {
       this.logger.warn(`No active session found for audio chunk: ${sessionId}`);
@@ -146,28 +170,35 @@ export class TranscriptionService implements OnModuleInit {
     if (session.useRealTranscription && this.transcriptionProvider) {
       // Send audio chunk to real transcription provider
       try {
-        await this.transcriptionProvider.processAudioChunk(sessionId, audioBuffer);
+        await this.transcriptionProvider.processAudioChunk(
+          sessionId,
+          audioBuffer,
+        );
       } catch (error: any) {
         this.logger.error(`Error processing audio chunk: ${error.message}`);
-        // Fallback: store chunk for mock processing
-        session.transcriptBuffer.push(audioBuffer);
+        // Fallback: store chunk for mock processing (base64)
+        session.transcriptBuffer.push(audioBuffer.toString('base64'));
       }
     } else {
-      // Store audio chunk for mock transcription
-      session.transcriptBuffer.push(audioBuffer);
+      // Store audio chunk for mock transcription (base64)
+      session.transcriptBuffer.push(audioBuffer.toString('base64'));
     }
   }
 
   /**
    * Handle transcription result from real provider
    */
-  private handleTranscriptionResult(sessionId: string, result: TranscriptionResult): void {
+  private handleTranscriptionResult(
+    sessionId: string,
+    result: TranscriptionResult,
+  ): void {
     const session = this.activeSessions.get(sessionId);
     if (!session) return;
 
     // Accumulate full transcript
     if (result.text) {
-      session.fullTranscript += (session.fullTranscript ? ' ' : '') + result.text;
+      session.fullTranscript +=
+        (session.fullTranscript ? ' ' : '') + result.text;
     }
 
     // Emit transcription event
@@ -210,7 +241,10 @@ export class TranscriptionService implements OnModuleInit {
     session.intervalId = setInterval(() => {
       if (transcriptIndex >= mockTranscripts.length) {
         // Generate SOAP update after all transcripts are done
-        if (transcriptIndex === mockTranscripts.length && session.fullTranscript.length > 0) {
+        if (
+          transcriptIndex === mockTranscripts.length &&
+          session.fullTranscript.length > 0
+        ) {
           this.processWithAI(sessionId, session.fullTranscript);
         }
         return;
@@ -231,7 +265,8 @@ export class TranscriptionService implements OnModuleInit {
       // Every 3rd transcript, emit final
       if ((transcriptIndex + 1) % 3 === 0) {
         // Accumulate full transcript
-        session.fullTranscript += (session.fullTranscript ? ' ' : '') + partialText;
+        session.fullTranscript +=
+          (session.fullTranscript ? ' ' : '') + partialText;
 
         session.callback({
           type: 'transcription_final',
@@ -243,7 +278,10 @@ export class TranscriptionService implements OnModuleInit {
         partialText = '';
 
         // Trigger AI processing after accumulating enough text (every 6 transcripts = ~12 seconds)
-        if ((transcriptIndex + 1) % 6 === 0 && session.fullTranscript.length > 50) {
+        if (
+          (transcriptIndex + 1) % 6 === 0 &&
+          session.fullTranscript.length > 50
+        ) {
           this.processWithAI(sessionId, session.fullTranscript);
         }
       }
@@ -255,7 +293,10 @@ export class TranscriptionService implements OnModuleInit {
   /**
    * Process transcription with AI agents
    */
-  private async processWithAI(sessionId: string, transcriptionText: string): Promise<void> {
+  private async processWithAI(
+    sessionId: string,
+    transcriptionText: string,
+  ): Promise<void> {
     const session = this.activeSessions.get(sessionId);
     if (!session) return;
 
@@ -268,14 +309,20 @@ export class TranscriptionService implements OnModuleInit {
       const result = await this.agentOrchestrator.processTranscription(
         transcriptionText,
         sessionId,
-        existingSOAP.subjective || existingSOAP.objective || existingSOAP.assessment || existingSOAP.plan
+        existingSOAP.subjective ||
+          existingSOAP.objective ||
+          existingSOAP.assessment ||
+          existingSOAP.plan
           ? existingSOAP
           : undefined,
       );
 
       // Update SOAP notes if generated
       if (result.soapNotes) {
-        await this.notesService.updateNotesFromWebSocket(sessionId, result.soapNotes);
+        await this.notesService.updateNotesFromWebSocket(
+          sessionId,
+          result.soapNotes,
+        );
 
         // Emit SOAP update
         session.callback({
@@ -309,11 +356,16 @@ export class TranscriptionService implements OnModuleInit {
           });
         }
 
-        this.logger.log(`Generated ${result.alerts.length} alerts for session ${sessionId}`);
+        this.logger.log(
+          `Generated ${result.alerts.length} alerts for session ${sessionId}`,
+        );
       }
     } catch (error: any) {
-      this.logger.error(`AI processing failed for session ${sessionId}: ${error.message}`, error.stack);
-      
+      this.logger.error(
+        `AI processing failed for session ${sessionId}: ${error.message}`,
+        error.stack,
+      );
+
       // Fallback to mock generation on error
       await this.generateSOAPUpdateFallback(sessionId, transcriptionText);
     }
@@ -322,11 +374,16 @@ export class TranscriptionService implements OnModuleInit {
   /**
    * Fallback: Generate mock SOAP update (when AI is unavailable or fails)
    */
-  private async generateSOAPUpdateFallback(sessionId: string, transcriptionText: string): Promise<void> {
+  private async generateSOAPUpdateFallback(
+    sessionId: string,
+    transcriptionText: string,
+  ): Promise<void> {
     const soapUpdate = {
-      subjective: transcriptionText.includes('patient') || transcriptionText.includes('reports')
-        ? transcriptionText
-        : 'Patient information recorded',
+      subjective:
+        transcriptionText.includes('patient') ||
+        transcriptionText.includes('reports')
+          ? transcriptionText
+          : 'Patient information recorded',
       objective: 'Vital signs and findings mentioned in conversation',
       assessment: 'Assessment based on conversation',
       plan: 'Plan to be determined based on assessment',

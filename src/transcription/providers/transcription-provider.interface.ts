@@ -26,7 +26,10 @@ export interface TranscriptionProvider {
   /**
    * Transcribe audio buffer (synchronous/async)
    */
-  transcribe(audioBuffer: Buffer, options?: TranscriptionOptions): Promise<TranscriptionResult>;
+  transcribe(
+    audioBuffer: Buffer,
+    options?: TranscriptionOptions,
+  ): Promise<TranscriptionResult>;
 
   /**
    * Start streaming transcription session

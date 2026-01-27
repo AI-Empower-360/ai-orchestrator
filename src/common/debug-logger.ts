@@ -4,11 +4,16 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
 
-const LOG_PATH = 'C:\\Users\\ctrpr\\Projects\\AI-Film-Studio\\.benchmarks\\.cursor\\debug.log';
+const LOG_PATH =
+  'C:\\Users\\ctrpr\\Projects\\AI-Film-Studio\\.benchmarks\\.cursor\\debug.log';
 
-export function debugLog(location: string, message: string, data: any, hypothesisId?: string) {
+export function debugLog(
+  location: string,
+  message: string,
+  data: any,
+  hypothesisId?: string,
+) {
   try {
     const logEntry = {
       location,

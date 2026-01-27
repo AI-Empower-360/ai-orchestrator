@@ -6,14 +6,21 @@ import { validateEnvironment } from './common/env-validation';
 
 async function bootstrap() {
   // #region agent log
-  debugLog('main.ts:7', 'Bootstrap started', { envPort: process.env.PORT, envFrontend: process.env.FRONTEND_URL }, 'A');
+  debugLog(
+    'main.ts:7',
+    'Bootstrap started',
+    { envPort: process.env.PORT, envFrontend: process.env.FRONTEND_URL },
+    'A',
+  );
   // #endregion
 
   // Validate environment variables
   const envValidation = validateEnvironment();
   if (envValidation.warnings.length > 0) {
     console.warn('⚠️  Environment variable warnings:');
-    envValidation.warnings.forEach((warning) => console.warn(`   - ${warning}`));
+    envValidation.warnings.forEach((warning) =>
+      console.warn(`   - ${warning}`),
+    );
   }
   if (!envValidation.valid) {
     console.error('❌ Environment validation failed:');
@@ -50,16 +57,30 @@ async function bootstrap() {
   try {
     await app.listen(port);
     // #region agent log
-    debugLog('main.ts:32', 'Server started successfully', { port, listening: true }, 'C');
+    debugLog(
+      'main.ts:32',
+      'Server started successfully',
+      { port, listening: true },
+      'C',
+    );
     // #endregion
     console.log(`🚀 Backend server running on http://localhost:${port}`);
   } catch (error: any) {
     // #region agent log
-    debugLog('main.ts:36', 'Port binding failed', { port, error: error.message, code: error.code }, 'C');
+    debugLog(
+      'main.ts:36',
+      'Port binding failed',
+      { port, error: error.message, code: error.code },
+      'C',
+    );
     // #endregion
     if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${port} is already in use. Please stop the existing server or use a different port.`);
-      console.error(`   To find and kill the process: netstat -ano | findstr :${port}`);
+      console.error(
+        `❌ Port ${port} is already in use. Please stop the existing server or use a different port.`,
+      );
+      console.error(
+        `   To find and kill the process: netstat -ano | findstr :${port}`,
+      );
       process.exit(1);
     }
     throw error;
@@ -68,7 +89,12 @@ async function bootstrap() {
 
 bootstrap().catch((error) => {
   // #region agent log
-  debugLog('main.ts:33', 'Bootstrap error', { error: error.message, stack: error.stack }, 'A');
+  debugLog(
+    'main.ts:33',
+    'Bootstrap error',
+    { error: error.message, stack: error.stack },
+    'A',
+  );
   // #endregion
   console.error('Failed to start server:', error);
   process.exit(1);

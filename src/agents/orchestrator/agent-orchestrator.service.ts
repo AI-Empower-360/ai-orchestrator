@@ -42,20 +42,28 @@ export class AgentOrchestratorService {
    * Orchestrate agent tasks
    */
   async executeTask(task: AgentTask): Promise<AgentResult> {
-    this.logger.log(`Executing agent task: ${task.type} for session ${task.sessionId}`);
+    this.logger.log(
+      `Executing agent task: ${task.type} for session ${task.sessionId}`,
+    );
 
     const result: AgentResult = {};
 
     try {
       // Generate or update SOAP notes
-      if (task.type === 'generate_soap' || task.type === 'update_soap' || task.type === 'combined') {
+      if (
+        task.type === 'generate_soap' ||
+        task.type === 'update_soap' ||
+        task.type === 'combined'
+      ) {
         if (task.existingSOAP && task.type === 'update_soap') {
           result.soapNotes = await this.soapAgent.updateSOAPNotes(
             task.existingSOAP as any,
             task.transcriptionText,
           );
         } else {
-          result.soapNotes = await this.soapAgent.generateSOAPNotes(task.transcriptionText);
+          result.soapNotes = await this.soapAgent.generateSOAPNotes(
+            task.transcriptionText,
+          );
         }
       }
 
@@ -67,7 +75,9 @@ export class AgentOrchestratorService {
         );
       }
 
-      this.logger.log(`Agent task completed successfully for session ${task.sessionId}`);
+      this.logger.log(
+        `Agent task completed successfully for session ${task.sessionId}`,
+      );
       return result;
     } catch (error: any) {
       this.logger.error(`Agent task failed: ${error.message}`, error.stack);

@@ -1,5 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { SOAPNotesDto, SOAPNotesResponseDto } from '../common/dto/soap-notes.dto';
+import { Injectable } from '@nestjs/common';
+import {
+  SOAPNotesDto,
+  SOAPNotesResponseDto,
+} from '../common/dto/soap-notes.dto';
 import { Session } from '../common/interfaces/session.interface';
 
 // Mock session storage (replace with real database)
@@ -9,7 +12,7 @@ const sessions: Map<string, Session> = new Map();
 export class NotesService {
   async getNotes(sessionId: string): Promise<SOAPNotesResponseDto> {
     const session = sessions.get(sessionId);
-    
+
     if (!session) {
       // Return empty notes for new sessions
       return {
@@ -36,7 +39,7 @@ export class NotesService {
     soap: SOAPNotesDto,
   ): Promise<SOAPNotesResponseDto> {
     const existingSession = sessions.get(sessionId);
-    
+
     const session: Session = existingSession
       ? {
           ...existingSession,

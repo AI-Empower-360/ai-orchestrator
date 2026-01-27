@@ -1,12 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, UseGuards } from '@nestjs/common';
 import { AlertsService } from './alerts.service';
-import { AlertsResponseDto, AcknowledgeAlertResponseDto } from '../common/dto/alert.dto';
+import {
+  AlertsResponseDto,
+  AcknowledgeAlertResponseDto,
+} from '../common/dto/alert.dto';
 import { SimpleJwtGuard } from '../auth/simple-jwt.guard';
 
 @Controller('api/alerts')
