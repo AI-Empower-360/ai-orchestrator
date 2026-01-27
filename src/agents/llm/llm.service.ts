@@ -169,9 +169,11 @@ export class LLMService {
         temperature: this.temperature,
         max_tokens: this.maxTokens,
         response_format: schema ? { type: 'json_object' } : undefined,
+        stream: false,
       });
 
-      const content = response.choices[0]?.message?.content || '';
+      const completion = response as ChatCompletion;
+      const content = completion.choices[0]?.message?.content || '';
 
       if (schema) {
         try {
