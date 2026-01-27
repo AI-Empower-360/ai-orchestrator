@@ -22,7 +22,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:environments": "npx ts-node test-environments.ts",
     "validate": "node prebuild-validation.js",
-    "validate:env": "npx ts-node test-environments.ts"
+    "validate:env": "npx ts-node test-environments.ts",
+    "test:app": "powershell -ExecutionPolicy Bypass -File test-app-local.ps1",
+    "test:app:quick": "powershell -ExecutionPolicy Bypass -File test-app-quick.ps1"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",
