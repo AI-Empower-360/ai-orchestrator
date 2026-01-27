@@ -1,0 +1,61 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: us-east-1
+    AWS_ACCOUNT_ID: "996099991638"
+    IMAGE_REPO_NAME: ai-im-agent-backend
+    IMAGE_TAG: production
+  parameter-store:
+    # Optional: Store secrets in Parameter Store
+    # JWT_SECRET: /ai-im-agent-backend/jwt-secret
+    # OPENAI_API_KEY: /ai-im-agent-backend/openai-key
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${IMAGE_TAG:-$COMMIT_HASH}
+      - echo Repository URI: $REPOSITORY_URI
+      - echo Image tag: $IMAGE_TAG
+      - echo Running pre-build validation...
+      - npm run validate
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Installing dependencies...
+      - npm ci
+      - echo Building application...
+      - npm run build
+      - echo Building Docker image...
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URI:latest
+      - echo Build completed on `date`
+  post_build:
+    commands:
+      - echo Pushing Docker image to ECR...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:latest
+      - echo Writing image definitions file...
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+      - echo Image pushed successfully
+      - |
+        if [ "$UPDATE_ECS_SERVICE" = "true" ]; then
+          echo Updating ECS service...
+          aws ecs update-service \
+            --cluster ai-im-agent-cluster \
+            --service ai-im-agent-backend-service \
+            --force-new-deployment \
+            --region $AWS_DEFAULT_REGION || echo "ECS service update skipped (service may not exist yet)"
+        fi
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - '**/*'
+  name: build-$(date +%Y-%m-%d)
