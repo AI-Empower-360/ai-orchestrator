@@ -156,6 +156,13 @@ export class TranscriptionGateway
           }
         });
       }
+    }).catch((error) => {
+      console.error(`Failed to start transcription session ${sessionId}:`, error);
+      client.emit('error', {
+        type: 'error',
+        message: 'Failed to start transcription',
+        code: 'TRANSCRIPTION_ERROR',
+      });
     });
 
     console.log(`Recording started for session: ${sessionId}`);
@@ -173,11 +180,13 @@ export class TranscriptionGateway
     // Decode base64 audio chunk
     const audioBuffer = Buffer.from(data.chunk, 'base64');
 
-    // Process audio chunk (mock transcription for now)
+    // Process audio chunk with real transcription provider
     this.transcriptionService.processAudioChunk(
       client.sessionId,
       audioBuffer,
-    );
+    ).catch((error) => {
+      console.error(`Error processing audio chunk for session ${client.sessionId}:`, error);
+    });
   }
 
   @SubscribeMessage('stop_recording')
@@ -188,7 +197,9 @@ export class TranscriptionGateway
     const { sessionId } = data;
 
     // Stop transcription service
-    this.transcriptionService.stopSession(sessionId);
+    this.transcriptionService.stopSession(sessionId).catch((error) => {
+      console.error(`Error stopping transcription session ${sessionId}:`, error);
+    });
 
     // Remove from active sessions
     if (this.activeSessions.has(sessionId)) {

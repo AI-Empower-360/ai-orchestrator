@@ -257,6 +257,31 @@ This backend is designed to work with:
 - `npm run test:e2e` - Run e2e tests
 - `npm run lint` - Run ESLint
 
+## 📚 Documentation
+
+Comprehensive documentation is available for all aspects of the AI Orchestrator:
+
+### Core Documentation
+
+- **[SETUP.md](./SETUP.md)** - Detailed setup and configuration guide
+- **[QUICK_START.md](./QUICK_START.md)** - Quick start guide for new developers
+- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide for all platforms
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
+- **[API_CONTRACTS.md](./API_CONTRACTS.md)** - API contracts and WebSocket schemas
+- **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** - Testing guide and best practices
+- **[WEBSOCKET_COMPATIBILITY.md](./WEBSOCKET_COMPATIBILITY.md)** - WebSocket compatibility guide
+
+### Documentation Index
+
+For a complete overview of all documentation, see **[docs/INDEX.md](./docs/INDEX.md)**.
+
+### Quick Links
+
+- **Setting up?** → [SETUP.md](./SETUP.md)
+- **Deploying?** → [DEPLOYMENT.md](./DEPLOYMENT.md)
+- **Having issues?** → [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+- **API Integration?** → [API_CONTRACTS.md](./API_CONTRACTS.md)
+
 ## 📄 License
 
 MIT
@@ -264,5 +289,6 @@ MIT
 ## 🔗 Related Repositories
 
 - **Frontend**: [ai-med-frontend](https://github.com/AI-Empower-360/ai-med-frontend)
+- **Backend**: [ai-med-backend](https://github.com/AI-Empower-360/ai-med-backend)
 - **Agents**: [ai-med-agents](https://github.com/AI-Empower-360/ai-med-agents) (Future)
 - **Infrastructure**: [ai-med-infrastructure](https://github.com/AI-Empower-360/ai-med-infrastructure) (Future)
