@@ -1,0 +1,5 @@
+{
+  "Variables": {
+    "CODEBUILD_PROJECT": "ai-im-agent-backend-build"
+  }
+}
