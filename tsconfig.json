@@ -20,5 +20,17 @@
     "paths": {
       "@/*": ["src/*"]
     }
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "**/*.spec.ts",
+    "frontend-patient",
+    "frontend-doctor",
+    "AI IM Agent",
+    "ai-med-frontend-patient",
+    "ai-med-frontend"
+  ]
 }
