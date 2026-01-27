@@ -38,3 +38,24 @@ lerna-debug.log*
 .env
 .env.local
 .env.*.local
+
+# Sibling projects in workspace (not part of ai-orchestrator)
+AI IM Agent/
+AI-Film-Studio/
+AI-Film-Studio-clean/
+AI-Film-Studio-clean2/
+AI-Film-Studio-clean3/
+AI-Video-Generator-main/
+AI-Video-Studio/
+Empower-Hub-AI--website/
+ai-med-backend/
+ai-med-frontend/
+ai-med-frontend-patient/
+ai-med-infrastructure/
+vedic-devotional-lib/
+video-creator-ai/
+youtube-video-summar/
+ai-orchestrator-check/
+DOCUMENTATION_SUMMARY.md
+NEXT_STEPS_ANALYSIS.md
+PROJECT_STATUS_AND_NEXT_STEPS.md
