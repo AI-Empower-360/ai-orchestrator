@@ -1,0 +1,49 @@
+{
+  "name": "ai-orchestrator",
+  "version": "1.0.0",
+  "description": "AI agent orchestration service for AI Med Agentic Agent platform",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "ai",
+    "orchestrator",
+    "medical",
+    "soap",
+    "clinical-alerts",
+    "llm"
+  ],
+  "author": "AI Empower 360",
+  "license": "MIT",
+  "dependencies": {
+    "ai-med-agents": "file:../ai-med-infrastructure/ai-med-agents",
+    "openai": "^4.28.0",
+    "dotenv": "^16.4.1",
+    "winston": "^3.11.0",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.1.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "prettier": "^3.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AI-Empower-360/ai-orchestrator.git"
+  }
+}
