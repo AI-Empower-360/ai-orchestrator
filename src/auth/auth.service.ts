@@ -12,6 +12,8 @@ const MOCK_DOCTORS: Doctor[] = [
     email: 'doctor@example.com',
     password: '$2b$10$rOzJqZqZqZqZqZqZqZqZqOqZqZqZqZqZqZqZqZqZqZqZqZqZqZqZq', // password: 'password123'
     name: 'Dr. John Smith',
+    organizationId: '1',
+    organizationName: 'Default Organization',
     createdAt: new Date(),
   },
 ];
@@ -43,7 +45,11 @@ export class AuthService {
     const doctor = await this.validateDoctor(loginDto.email, loginDto.password);
     if (!doctor) throw new UnauthorizedException('Invalid email or password');
 
-    const payload = { email: doctor.email, sub: doctor.id };
+    const payload = { 
+      email: doctor.email, 
+      sub: doctor.id,
+      organizationId: doctor.organizationId 
+    };
     const token = this.jwtService.sign(payload);
     return {
       token,
@@ -51,6 +57,8 @@ export class AuthService {
         id: doctor.id,
         name: doctor.name,
         email: doctor.email,
+        organizationId: doctor.organizationId,
+        organizationName: doctor.organizationName,
       },
     };
   }
