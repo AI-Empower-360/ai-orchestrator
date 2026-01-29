@@ -55,11 +55,13 @@ You can build and push the image from **GitHub Actions** instead of installing D
    - Trigger: push to `main` or **Run workflow** from the Actions tab.
    - It builds the Docker image and pushes to `ai-med-agent-backend` in ECR.
 
-3. Configure AWS credentials for GitHub Actions:
-   - **OIDC (recommended):** IAM role `github-actions-role` with trust for your GitHub repo (see `build-and-push-ecr.yml`).
-   - **Or:** store `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as repo secrets and use `aws-actions/configure-aws-credentials` with `aws-access-key-id` / `aws-secret-access-key`.
+3. **Add GitHub secrets** (repo → Settings → Secrets and variables → Actions):
+   - `AWS_ACCESS_KEY_ID` – IAM user access key with ECR push rights.
+   - `AWS_SECRET_ACCESS_KEY` – matching secret key.
 
-4. Push your code to `main` (or trigger the workflow manually). The workflow will build and push the image.
+   (Optional: use OIDC instead – add a GitHub OIDC provider in AWS and a role; then switch the workflow to `role-to-assume`.)
+
+4. Push your code to `main` (or run **Actions → Build and Push AI Med Agent to ECR → Run workflow**). The workflow will build and push the image.
 
 ---
 
