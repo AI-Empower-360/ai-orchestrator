@@ -30,8 +30,11 @@ jobs:
 
       - name: Check AWS credentials
         id: check-credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ] || [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
             echo "credentials_available=false" >> $GITHUB_OUTPUT
             echo "::warning::AWS credentials not configured. Skipping ECR deployment."
             echo "::notice::To enable ECR deployment, configure AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets."
