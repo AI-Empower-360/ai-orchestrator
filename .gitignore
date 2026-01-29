@@ -60,3 +60,4 @@ ai-orchestrator-check/
 DOCUMENTATION_SUMMARY.md
 NEXT_STEPS_ANALYSIS.md
 PROJECT_STATUS_AND_NEXT_STEPS.md
+tsconfig.build.json
