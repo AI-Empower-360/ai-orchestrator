@@ -55,6 +55,8 @@ This script will:
 
 ## Step-by-Step Manual Deployment
 
+> **💡 Tip**: Instead of manual deployment, you can use the automated GitHub Actions workflow (`.github/workflows/build-and-push-ecr.yml`) which automatically creates the ECR repository `ai-med-agent-backend`, builds the image, and pushes to ECR. Just push to `main` or manually trigger the workflow!
+
 ### Step 1: Build and Push Docker Image
 
 ```powershell

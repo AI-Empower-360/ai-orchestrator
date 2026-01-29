@@ -46,17 +46,22 @@ Use one of these options to run Docker locally for building and pushing the AI M
 
 You can build and push the image from **GitHub Actions** instead of installing Docker locally.
 
-1. Ensure the **`ai-med-agent-backend`** ECR repository exists in AWS. If not:
-   ```bash
-   aws ecr create-repository --repository-name ai-med-agent-backend --region us-east-1
-   ```
+1. **No manual ECR setup required!** The workflow **`.github/workflows/build-and-push-ecr.yml`** automatically creates the `ai-med-agent-backend` ECR repository if it doesn't exist.
 
-2. Use the workflow **`.github/workflows/build-and-push-ecr.yml`** in this repo:
+2. Use the workflow in this repo:
    - Trigger: push to `main` or **Run workflow** from the Actions tab.
-   - It builds the Docker image and pushes to `ai-med-agent-backend` in ECR.
+   - The workflow will:
+     - Create the ECR repository `ai-med-agent-backend` (if needed)
+     - Build the Docker image
+     - Push to ECR with proper image scanning and encryption
 
 3. Configure AWS credentials for GitHub Actions:
    - **OIDC (recommended):** IAM role `github-actions-role` with trust for your GitHub repo (see `build-and-push-ecr.yml`).
+     - **Required Permissions**:
+       - `ecr:CreateRepository` (for automatic repository creation)
+       - `ecr:DescribeRepositories` (to check if repository exists)
+       - `ecr:GetAuthorizationToken` (for ECR login)
+       - `ecr:BatchCheckLayerAvailability`, `ecr:PutImage`, `ecr:InitiateLayerUpload`, `ecr:UploadLayerPart`, `ecr:CompleteLayerUpload` (for pushing images)
    - **Or:** store `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as repo secrets and use `aws-actions/configure-aws-credentials` with `aws-access-key-id` / `aws-secret-access-key`.
 
 4. Push your code to `main` (or trigger the workflow manually). The workflow will build and push the image.
