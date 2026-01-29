@@ -7,6 +7,7 @@ import { TranscriptionModule } from './transcription/transcription.module';
 import { HealthModule } from './health/health.module';
 import { LLMModule } from './agents/llm/llm.module';
 import { AgentOrchestratorModule } from './agents/orchestrator/agent-orchestrator.module';
+import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AgentOrchestratorModule } from './agents/orchestrator/agent-orchestrato
     NotesModule,
     AlertsModule,
     TranscriptionModule,
+    OrganizationModule,
   ],
 })
 export class AppModule {}

@@ -3,5 +3,7 @@ export interface Doctor {
   email: string;
   password: string; // Hashed
   name: string;
+  organizationId?: string;
+  organizationName?: string;
   createdAt: Date;
 }
