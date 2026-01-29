@@ -57,6 +57,11 @@ You can build and push the image from **GitHub Actions** instead of installing D
 
 3. Configure AWS credentials for GitHub Actions:
    - **OIDC (recommended):** IAM role `github-actions-role` with trust for your GitHub repo (see `build-and-push-ecr.yml`).
+     - **Required Permissions**:
+       - `ecr:CreateRepository` (for automatic repository creation)
+       - `ecr:DescribeRepositories` (to check if repository exists)
+       - `ecr:GetAuthorizationToken` (for ECR login)
+       - `ecr:BatchCheckLayerAvailability`, `ecr:PutImage`, `ecr:InitiateLayerUpload`, `ecr:UploadLayerPart`, `ecr:CompleteLayerUpload` (for pushing images)
    - **Or:** store `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as repo secrets and use `aws-actions/configure-aws-credentials` with `aws-access-key-id` / `aws-secret-access-key`.
 
 4. Push your code to `main` (or trigger the workflow manually). The workflow will build and push the image.
