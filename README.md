@@ -1,6 +1,8 @@
-# AI Med Backend
+# AI Med Backend (ai-orchestrator)
 
-NestJS backend API for the AI Agentic Internal Medicine platform. Provides REST APIs and WebSocket server for real-time transcription, SOAP notes, and clinical alerts.
+NestJS backend API for the **AI Med agent** (AI Agentic Internal Medicine) platform. Provides REST APIs and WebSocket server for real-time transcription, SOAP notes, and clinical alerts.
+
+> **Note:** This repo ([AI-Empower-360/ai-orchestrator](https://github.com/AI-Empower-360/ai-orchestrator)) is the backend for the AI Med agent. All deployment and infra (Terraform, ECS, ECR) use `ai-med-agent-*` naming.
 
 ## 🎯 Features
 

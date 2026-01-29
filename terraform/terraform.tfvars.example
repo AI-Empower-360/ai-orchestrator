@@ -1,20 +1,18 @@
-# Copy this file to terraform.tfvars and update with your values
+# AI Med Agent (ai-orchestrator) – copy to terraform.tfvars and fill in
 
-aws_region = "us-east-1"
-environment = "production"
-project_name = "ai-im-agent-backend"
+aws_region   = "us-east-1"
+environment  = "production"
+project_name = "ai-med-agent-backend"
 
 github_owner = "AI-Empower-360"
-github_repo = "ai-orchestrator"
+github_repo  = "ai-orchestrator"
 github_branch = "main"
 
-# Get this from AWS Console after creating GitHub connection
-# https://console.aws.amazon.com/codesuite/settings/connections?region=us-east-1
-github_connection_arn = "arn:aws:codestar-connections:us-east-1:996099991638:connection/xxxxx"
+# Create connection: https://console.aws.amazon.com/codesuite/settings/connections?region=us-east-1
+github_connection_arn = "arn:aws:codestar-connections:us-east-1:YOUR_ACCOUNT:connection/xxxxx"
 
-ecr_repository_name = "ai-im-agent-backend"
-ecs_cluster_name = "ai-im-agent-cluster"
-ecs_service_name = "ai-im-agent-backend-service"
+ecr_repository_name = "ai-med-agent-backend"
+ecs_cluster_name    = "ai-med-agent-cluster"
+ecs_service_name    = "ai-med-agent-backend-service"
 
-# Optional: GitHub webhook secret for Lambda
 lambda_webhook_secret = ""

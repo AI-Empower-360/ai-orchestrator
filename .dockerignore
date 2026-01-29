@@ -1,24 +1,31 @@
+# Dependencies and build output
 node_modules
-npm-debug.log
 dist
 coverage
+
+# Git and IDE
 .git
 .gitignore
-.env
-.env.local
-.env.*.local
-*.log
-.DS_Store
-.vscode
 .idea
-*.md
-!README.md
+.vscode
+*.log
+
+# Environment and secrets
+.env
+.env.*
+.env.example
+
+# Tests and docs (not needed in image)
 test
-*.spec.ts
-test-*.js
-test-*.ps1
-frontend-patient
-frontend-doctor
-AI IM Agent
-ai-med-frontend-patient
-ai-med-frontend
+**/*.spec.ts
+**/*.e2e-spec.ts
+*.md
+docs
+terraform
+aws
+
+# Sibling / unrelated projects
+ai-med-backend-clean
+ai-med-backend-mirror.git
+ai-orchestrator-repo
+ai-orchestrator-check

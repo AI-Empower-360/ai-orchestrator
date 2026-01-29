@@ -9,6 +9,7 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "./src",
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -22,15 +23,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test",
-    "**/*.spec.ts",
-    "frontend-patient",
-    "frontend-doctor",
-    "AI IM Agent",
-    "ai-med-frontend-patient",
-    "ai-med-frontend"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

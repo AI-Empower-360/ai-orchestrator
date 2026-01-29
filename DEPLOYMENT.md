@@ -16,6 +16,29 @@ Comprehensive guide for deploying the AI Orchestrator service to various platfor
 5. [Post-Deployment](#post-deployment)
 6. [Monitoring & Maintenance](#monitoring--maintenance)
 
+## AI Med Agent quick deploy
+
+From repo root:
+
+```powershell
+# Build only (no Docker)
+.\deploy-ai-med-agent.ps1 -SkipDocker
+
+# Build + Docker build + ECR push (requires Docker + AWS CLI)
+.\deploy-ai-med-agent.ps1 -Region us-east-1 -Tag latest
+```
+
+Uses ECR repo `ai-med-agent-backend` and `ai-med-agent-*` naming (see `terraform/terraform.tfvars`).
+
+### Docker Desktop install (Windows)
+
+See **[DOCKER_INSTALL.md](./DOCKER_INSTALL.md)** for:
+- **Option A:** Chocolatey (`choco install docker-desktop`) – run PowerShell as Administrator
+- **Option B:** [Direct download](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe)
+- **Option C:** Use GitHub Actions (`.github/workflows/build-and-push-ecr.yml`) to build and push – **no local Docker required**
+
+---
+
 ## Prerequisites
 
 Before deploying, ensure you have:
